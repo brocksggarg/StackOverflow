@@ -13,28 +13,27 @@ import models.Question;
 import repository.DataStore;
 import service.UserActivityService;
 
-public class UserActivityServiceImpl implements UserActivityService{
+public class UserActivityServiceImpl implements UserActivityService {
 
-	DataStore dataStore;
-	
-	
-	public UserActivityServiceImpl() {
-		dataStore=new DataStore();
+	private DataStore dataStore;
+
+	public UserActivityServiceImpl(DataStore dataStore) {
+		this.dataStore = dataStore;
 	}
 
 	@Override
 	public Question postQuestion(String heading, String desc, Set<String> tags, String userId) {
-		Question ques=new Question(heading, desc,tags,userId);
+		Question ques = new Question(heading, desc, tags, userId);
 		return dataStore.addQuestionToStore(ques);
 	}
 
 	@Override
 	public Question addAnswer(String answerText, String quesId, String userId) throws InvalidQuestionException {
-		Question ques=dataStore.getQuestionFromId(quesId);
-		if(ques==null) {
+		Question ques = dataStore.getQuestionFromId(quesId);
+		if (ques == null) {
 			throw new InvalidQuestionException("quesId does not exist");
-		}else {
-			Answer ans=new Answer(answerText);
+		} else {
+			Answer ans = new Answer(answerText);
 			ques.getAnswers().put(quesId, ans);
 			dataStore.updateQuestionWithAnswer(ques);
 			return ques;
@@ -42,17 +41,18 @@ public class UserActivityServiceImpl implements UserActivityService{
 	}
 
 	@Override
-	public Question addComment(String commentText, String quesId, String ansId, String userId) throws InvalidQuestionException {
-		Question ques=dataStore.getQuestionFromId(quesId);
-		if(ques==null) {
+	public Question addComment(String commentText, String quesId, String ansId, String userId)
+			throws InvalidQuestionException {
+		Question ques = dataStore.getQuestionFromId(quesId);
+		if (ques == null) {
 			throw new InvalidQuestionException("quesId does not exist");
-		}else {
-			Comment comment=new Comment(commentText,userId);
-			if(quesId==ansId) {
+		} else {
+			Comment comment = new Comment(commentText, userId);
+			if (quesId == ansId) {
 				ques.getComments().add(comment);
 				dataStore.updateQuestionWithAnswer(ques);
-			}else {
-				Answer answer=ques.getAnswers().get(ansId);
+			} else {
+				Answer answer = ques.getAnswers().get(ansId);
 				answer.getComments().add(comment);
 				dataStore.updateQuestionWithAnswer(ques);
 			}
@@ -62,10 +62,10 @@ public class UserActivityServiceImpl implements UserActivityService{
 
 	@Override
 	public Integer upvote(String quesId, String userId) throws InvalidQuestionException {
-		Question ques=dataStore.getQuestionFromId(quesId);
-		if(ques==null) {
+		Question ques = dataStore.getQuestionFromId(quesId);
+		if (ques == null) {
 			throw new InvalidQuestionException("quesId does not exist");
-		}else {
+		} else {
 			ques.getUpvotes().add(userId);
 			dataStore.updateQuestion(ques);
 			return ques.getUpvotes().size();
@@ -74,10 +74,10 @@ public class UserActivityServiceImpl implements UserActivityService{
 
 	@Override
 	public Integer downvote(String quesId, String userId) throws InvalidQuestionException {
-		Question ques=dataStore.getQuestionFromId(quesId);
-		if(ques==null) {
+		Question ques = dataStore.getQuestionFromId(quesId);
+		if (ques == null) {
 			throw new InvalidQuestionException("quesId does not exist");
-		}else {
+		} else {
 			ques.getUpvotes().remove(userId);
 			dataStore.updateQuestion(ques);
 			return ques.getUpvotes().size();
@@ -90,31 +90,30 @@ public class UserActivityServiceImpl implements UserActivityService{
 		return null;
 	}
 
-	Question searchQuestion(String searchText){
-		List<Question> quesList=new ArrayList<Question>();
-		List<String> tags=dataStore.getTagsFromText(searchText);
-		Map<String, Long> questionCountMap=new HashMap<>();
-		for(String tag:tags) {
+	Question searchQuestion(String searchText) {
+		List<Question> quesList = new ArrayList<Question>();
+		List<String> tags = dataStore.getTagsFromText(searchText);
+		Map<String, Long> questionCountMap = new HashMap<>();
+		for (String tag : tags) {
 			List<String> quesIds = dataStore.getQuestionIdsFromTag(tag);
-			for(String id:quesIds) {
-				questionCountMap.put(id, questionCountMap.getOrDefault(id, 0l)+1);
+			for (String id : quesIds) {
+				questionCountMap.put(id, questionCountMap.getOrDefault(id, 0l) + 1);
 			}
 		}
-		if(questionCountMap.size()==0) {
+		if (questionCountMap.size() == 0) {
 			return null;
-		}else {
-			String maxCountQuesId="";
-			long maxCount=0l;
-			for(String id:questionCountMap.keySet()) {
-				if(questionCountMap.get(id)>maxCount) {
-					maxCountQuesId=id;
-					maxCount=questionCountMap.get(id);
+		} else {
+			String maxCountQuesId = "";
+			long maxCount = 0l;
+			for (String id : questionCountMap.keySet()) {
+				if (questionCountMap.get(id) > maxCount) {
+					maxCountQuesId = id;
+					maxCount = questionCountMap.get(id);
 				}
 			}
 			return dataStore.getQuestionFromId(maxCountQuesId);
 		}
-		
-	}
 
+	}
 
 }
