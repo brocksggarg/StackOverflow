@@ -28,12 +28,12 @@ public class DataStore {
 		useraccounts = new HashMap<>();
 	}
 
-	public User addUser(String username, String password, String role) throws UserAccountException {
-		if (usernamePasswordMap.containsKey(username)) {
-			throw new UserAccountException("username " + username + " already exists");
+	public User addUser(User user) throws UserAccountException {
+		if (usernamePasswordMap.containsKey(user.getUsername())) {
+			throw new UserAccountException("username " + user.getUsername() + " already exists");
 		}
-		User user = new User(username, password, role);
-		usernamePasswordMap.put(username, password);
+
+		usernamePasswordMap.put(user.getUsername(), user.getPasssword());
 		useraccounts.put(user.getId(), user);
 		return user;
 	}
@@ -69,6 +69,13 @@ public class DataStore {
 
 	public void updateQuestion(Question ques) {
 		questionStore.put(ques.getId(), ques);
+
+	}
+
+	public void addQuestionIdToTagStore(String keyword, String id) {
+		List<String> l = tagsToQuestionMap.getOrDefault(keyword, new ArrayList<>());
+		l.add(id);
+		tagsToQuestionMap.put(keyword, l);
 
 	}
 

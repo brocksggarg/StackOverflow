@@ -1,6 +1,5 @@
 package service.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,19 +10,23 @@ import models.Answer;
 import models.Comment;
 import models.Question;
 import repository.DataStore;
-import service.UserActivityService;
+import service.RegisteredUsersActivityService;
 
-public class UserActivityServiceImpl implements UserActivityService {
+public class RegisteredUsersActivityServiceImpl implements RegisteredUsersActivityService {
 
 	private DataStore dataStore;
 
-	public UserActivityServiceImpl(DataStore dataStore) {
+	public RegisteredUsersActivityServiceImpl(DataStore dataStore) {
 		this.dataStore = dataStore;
 	}
 
 	@Override
 	public Question postQuestion(String heading, String desc, Set<String> tags, String userId) {
 		Question ques = new Question(heading, desc, tags, userId);
+		List<String> keywords=dataStore.getTagsFromText(desc);
+		for(String keyword:keywords) {
+			dataStore.addQuestionIdToTagStore(keyword, ques.getId());
+		}
 		return dataStore.addQuestionToStore(ques);
 	}
 
@@ -90,8 +93,8 @@ public class UserActivityServiceImpl implements UserActivityService {
 		return null;
 	}
 
-	Question searchQuestion(String searchText) {
-		List<Question> quesList = new ArrayList<Question>();
+	@Override
+	public Question searchQuestion(String searchText) {
 		List<String> tags = dataStore.getTagsFromText(searchText);
 		Map<String, Long> questionCountMap = new HashMap<>();
 		for (String tag : tags) {
